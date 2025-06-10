@@ -1,0 +1,724 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>物件導向程式設計測驗</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      font-size: 16px;
+      border-radius: 4px;
+    }
+    .question {
+      margin-bottom: 20px;
+    }
+    .question p {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .question img {
+      max-width: 100%;
+      height: auto;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    input[type="radio"], input[type="checkbox"] {
+      margin-right: 5px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .correct {
+      color: green;
+    }
+    .incorrect {
+      color: red;
+    }
+    #total-result {
+      margin-top: 20px;
+      font-weight: bold;
+      text-align: center;
+    }
+    a {
+      color: #007bff;
+      text-decoration: underline;
+    }
+    a:hover {
+      color: #0056b3;
+    }
+    html, body {
+      height: auto;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>物件導向程式設計測驗</h1>
+    <select id="quiz-select">
+      <option value="basic">物件導向技術基本觀念</option>
+      <option value="modeling">物件資料結構塑模</option>
+      <option value="interaction">互動行為塑模</option>
+      <option value="activity">作業行為塑模</option>
+    </select>
+    <div id="quiz"></div>
+    <button id="submit">提交答案</button>
+    <div id="total-result"></div>
+  </div>
+
+  <script>
+    const quizzes = {
+      basic: [
+        {
+          id: 'q1',
+          text: '根據物件的定義，一個物件包含以下那些？（多選題）',
+          type: 'checkbox',
+          options: [
+            { value: 'A', label: '名稱' },
+            { value: 'B', label: '方法' },
+            { value: 'C', label: '多型' },
+            { value: 'D', label: '屬性' }
+          ],
+          correct: ['A', 'B', 'D']
+        },
+        {
+          id: 'q2',
+          text: '關於物件導向概念，何者可增加程式碼的重用(Reuse)及產生可靠度較高的軟體？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '封裝' },
+            { value: 'B', label: '同名異式' },
+            { value: 'C', label: '設計樣式' },
+            { value: 'D', label: '繼承' }
+          ],
+          correct: 'D'
+        },
+        {
+          id: 'q3',
+          text: '關於物件導向概念，物件之間是藉由什麼來彼此溝通的？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '封裝' },
+            { value: 'B', label: '訊息' },
+            { value: 'C', label: '屬性' },
+            { value: 'D', label: '方法' }
+          ],
+          correct: 'B'
+        },
+        {
+          id: 'q4',
+          text: '關於物件導向概念，何者可達到「資訊隱藏」的目的？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '封裝' },
+            { value: 'B', label: '同名異式' },
+            { value: 'C', label: '方法' },
+            { value: 'D', label: '繼承' }
+          ],
+          correct: 'A'
+        },
+        {
+          id: 'q5',
+          text: '類別階層組織主要藉由以下何者建構而成？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '封裝' },
+            { value: 'B', label: '同名異式' },
+            { value: 'C', label: '繼承' },
+            { value: 'D', label: '訊息' }
+          ],
+          correct: 'C'
+        },
+        {
+          id: 'q6',
+          text: '關於物件導向概念，物件與類別的關係何者？（多選題）',
+          type: 'checkbox',
+          options: [
+            { value: 'A', label: '類別是物件的定義' },
+            { value: 'B', label: '類別是具有相同結構及行為的物件所組成的集合' },
+            { value: 'C', label: '物件是許多類別共同特徵的一種描述' },
+            { value: 'D', label: '類別是物件經分類與抽象化後所得的結果' }
+          ],
+          correct: ['A', 'B', 'D']
+        },
+        {
+          id: 'q7',
+          text: '寫「同名異式」程式的目的為何？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '資訊隱藏' },
+            { value: 'B', label: '簡化系統發展的複雜性並增加其彈性' },
+            { value: 'C', label: '促進軟體業界的分工' },
+            { value: 'D', label: '保護物件' }
+          ],
+          correct: 'B'
+        },
+        {
+          id: 'q8',
+          text: '子類別將由父類別繼承來的屬性或方法重新定義的動作稱為？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '超載' },
+            { value: 'B', label: '過荷' },
+            { value: 'C', label: '覆寫' },
+            { value: 'D', label: '多型' }
+          ],
+          correct: 'C'
+        },
+        {
+          id: 'q9',
+          text: '「同名異式」中類別間的關係，主要是架構在甚麼之上？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '繼承' },
+            { value: 'B', label: '物件' },
+            { value: 'C', label: '封裝' },
+            { value: 'D', label: '過荷' }
+          ],
+          correct: 'A'
+        }
+      ],
+      modeling: [
+        {
+          id: 'q1',
+          text: '在使用個案模式之中，最主要是利用何者去分析與設計出類別圖？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '使用個案之情節' },
+            { value: 'B', label: '使用個案圖' },
+            { value: 'C', label: '行為者' },
+            { value: 'D', label: '使用個案間之關係' }
+          ],
+          correct: 'A'
+        },
+        {
+          id: 'q2',
+          text: '以下何者最適合設計為類別的操作(或稱為方法)？（多選題）',
+          type: 'checkbox',
+          options: [
+            { value: 'A', label: '置入購物車' },
+            { value: 'B', label: '數量' },
+            { value: 'C', label: '會員' },
+            { value: 'D', label: '計算總金額' }
+          ],
+          correct: ['A', 'D']
+        },
+        {
+          id: 'q3',
+          text: '關於類別圖中關聯關係的基數，如果兩類別A與B，1個A的物件對應到多個B的物件，而1個B的物件也對應到多個A的物件，請問A與B之關聯基數為何？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '1對1' },
+            { value: 'B', label: '1對多' },
+            { value: 'C', label: '多對1' },
+            { value: 'D', label: '多對多' }
+          ],
+          correct: 'D'
+        },
+        {
+          id: 'q4',
+          text: '物件的特徵、值或狀態通常被設計成何者？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '類別' },
+            { value: 'B', label: '屬性' },
+            { value: 'C', label: '操作' },
+            { value: 'D', label: '訊息' }
+          ],
+          correct: 'B'
+        },
+        {
+          id: 'q5',
+          text: '價格適合當作以下哪個類別的屬性？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '商品' },
+            { value: 'B', label: '倉庫' },
+            { value: 'C', label: '業務部' },
+            { value: 'D', label: '客戶' }
+          ],
+          correct: 'A'
+        },
+        {
+          id: 'q6',
+          text: '在我們所學的分析與設計的方法中，完成需求塑模之後，以下哪一種圖要優先完成？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '類別圖' },
+            { value: 'B', label: '循序圖' },
+            { value: 'C', label: '元件圖' },
+            { value: 'D', label: '合作圖' }
+          ],
+          correct: 'A'
+        },
+        {
+          id: 'q7',
+          text: '以下那一種圖可用於描述一系統於某一時間點的系統影像(Snapshot)，並可藉由一時間序列的此種圖形來表達系統的行為？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '物件圖' },
+            { value: 'B', label: '元件圖' },
+            { value: 'C', label: '部署圖' },
+            { value: 'D', label: '使用個案圖' }
+          ],
+          correct: 'A'
+        },
+        {
+          id: 'q8',
+          text: '物件圖必須以下面那一種圖的內容做為基礎？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '部署圖' },
+            { value: 'B', label: '類別圖' },
+            { value: 'C', label: '狀態圖' },
+            { value: 'D', label: '元件圖' }
+          ],
+          correct: 'B'
+        },
+        {
+          id: 'q9',
+          text: '附件中的圖形，哪些是子類別？（多選題）',
+          image: 'https://flipclass.stust.edu.tw/sysdata/attach/kexam.32881/kques.792079/41922f238515ae775516081a9385f097.png',
+          type: 'checkbox',
+          options: [
+            { value: 'A', label: '客戶' },
+            { value: 'B', label: '個人客戶' },
+            { value: 'C', label: '公司客戶' },
+            { value: 'D', label: '員工' }
+          ],
+          correct: ['B', 'C']
+        },
+        {
+          id: 'q10',
+          text: '附件中的圖形，哪些是子類別？（多選題）',
+          image: 'https://flipclass.stust.edu.tw/sysdata/attach/kexam.32881/kques.792080/d2e7b8fa0a4dc92fdf7e2ba52b1435cc.png',
+          type: 'checkbox',
+          options: [
+            { value: 'A', label: '客戶' },
+            { value: 'B', label: '個人客戶' },
+            { value: 'C', label: '公司客戶' },
+            { value: 'D', label: '員工' }
+          ],
+          correct: ['B', 'C']
+        },
+        {
+          id: 'q11',
+          text: '底下的圖形中，個人客戶有幾個屬性？',
+          image: 'https://flipclass.stust.edu.tw/sysdata/attach/kexam.32881/kques.792080/d2e7b8fa0a4dc92fdf7e2ba52b1435cc.png',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '1' },
+            { value: 'B', label: '3' },
+            { value: 'C', label: '4' },
+            { value: 'D', label: '5' }
+          ],
+          correct: 'B'
+        }
+      ],
+      interaction: [
+        {
+          id: 'q1',
+          text: '以下那一種圖可以描述物件間以訊息傳遞之互動行為？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '部署圖' },
+            { value: 'B', label: '循序圖' },
+            { value: 'C', label: '狀態圖' },
+            { value: 'D', label: '類別圖' }
+          ],
+          correct: 'B'
+        },
+        {
+          id: 'q2',
+          text: '循序圖所描述物件間訊息傳遞之互動過程，主要是來自於哪裡？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '物件圖' },
+            { value: 'B', label: '使用個案之情節' },
+            { value: 'C', label: '類別圖' },
+            { value: 'D', label: '使用個案圖' }
+          ],
+          correct: 'B'
+        },
+        {
+          id: 'q3',
+          text: '關於循序圖中的各種元素，以下何者描述錯誤？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '「控制焦點」表達物件執行某動作之時段' },
+            { value: 'B', label: '「訊息」是由某一物件送至另一物件以啟動操作' },
+            { value: 'C', label: '「生命線」是表達物件在某時段之存在' },
+            { value: 'D', label: '「物件」不能傳送訊息給行為者' }
+          ],
+          correct: 'D'
+        },
+        {
+          id: 'q4',
+          text: '下圖中，哪一個不是操作？',
+          image: 'https://flipclass.stust.edu.tw/sysdata/attach/itemPool.125/kques.82865/ba0c3c508a8ff8b4c70ac8c2fc1a2e60.png',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '修改訂購數量' },
+            { value: 'B', label: '設定訂購數量' },
+            { value: 'C', label: '計算總金額' },
+            { value: 'D', label: '購物車內容明細' }
+          ],
+          correct: 'D'
+        },
+        {
+          id: 'q5',
+          text: '在下圖中，購物車物件擁有哪些操作或方法？（多選題）',
+          image: 'https://flipclass.stust.edu.tw/sysdata/attach/itemPool.125/kques.82865/ba0c3c508a8ff8b4c70ac8c2fc1a2e60.png',
+          type: 'checkbox',
+          options: [
+            { value: 'A', label: '修改訂購數量' },
+            { value: 'B', label: '設定訂購數量' },
+            { value: 'C', label: '計算總金額' },
+            { value: 'D', label: '購物車內容明細' }
+          ],
+          correct: ['B', 'C']
+        },
+        {
+          id: 'q6',
+          text: '根據上課教材的方法，是參考以下那些去建構循序圖？（多選題）',
+          type: 'checkbox',
+          options: [
+            { value: 'A', label: '類別圖' },
+            { value: 'B', label: '使用個案情節' },
+            { value: 'C', label: '元件圖' },
+            { value: 'D', label: '活動圖' }
+          ],
+          correct: ['A', 'B']
+        },
+        {
+          id: 'q7',
+          text: '以下哪種圖，訊息必須標示序號，否則無法知道訊息發送的順序？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '使用個案圖' },
+            { value: 'B', label: '循序圖' },
+            { value: 'C', label: '類別圖' },
+            { value: 'D', label: '合作圖' }
+          ],
+          correct: 'D'
+        },
+        {
+          id: 'q8',
+          text: '循序圖中的那一種框架可做為隱藏部分細節之用？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '多選一' },
+            { value: 'B', label: '迴圈' },
+            { value: 'C', label: '平行' },
+            { value: 'D', label: '參考' }
+          ],
+          correct: 'D'
+        },
+        {
+          id: 'q9',
+          text: '如果循序圖沒有使用到框架，可以和那一種圖互相轉換？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '狀態圖' },
+            { value: 'B', label: '活動圖' },
+            { value: 'C', label: '元件圖' },
+            { value: 'D', label: '合作圖' }
+          ],
+          correct: 'D'
+        },
+        {
+          id: 'q10',
+          text: '附件中的圖形，哪一個是第三個送出的訊息？',
+          image: 'https://flipclass.stust.edu.tw/sysdata/attach/kexam.33221/kques.803664/0f6ecdab46a3a22356ce23ea59856f04.png',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '修改訂購數量' },
+            { value: 'B', label: '設定訂購數量' },
+            { value: 'C', label: '計算總金額' },
+            { value: 'D', label: '購物車內容明細' }
+          ],
+          correct: 'C'
+        }
+      ],
+      activity: [
+        {
+          id: 'q1',
+          text: '以下那一種圖可表達被描述者在其生命週期中的一些情況(Situation)，且在這些情況中轉換，每個情況都滿足某條件，可能正等待某些事件的發生，且可能正在執行某活動？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '類別圖' },
+            { value: 'B', label: '部署圖' },
+            { value: 'C', label: '活動圖' },
+            { value: 'D', label: '狀態圖' }
+          ],
+          correct: 'D'
+        },
+        {
+          id: 'q2',
+          text: '狀態圖可以描述以下何者的狀態與轉換？（多選題）',
+          type: 'checkbox',
+          options: [
+            { value: 'A', label: '軟體' },
+            { value: 'B', label: '硬體' },
+            { value: 'C', label: '大自然現象' },
+            { value: 'D', label: '以上皆非' }
+          ],
+          correct: ['A', 'B', 'C']
+        },
+        {
+          id: 'q3',
+          text: '哪些圖可以表達事情的先後順序？（多選題）',
+          type: 'checkbox',
+          options: [
+            { value: 'A', label: '使用個案圖' },
+            { value: 'B', label: '流程圖' },
+            { value: 'C', label: '環境圖' },
+            { value: 'D', label: '活動圖' }
+          ],
+          correct: ['B', 'D']
+        },
+        {
+          id: 'q4',
+          text: '關於狀態圖中之轉換：事件 [成立條件] ／ 動作，以下描述何者錯誤？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '在每個轉換這三者都要具備' },
+            { value: 'B', label: '[成立條件] 若判斷為真，狀態轉換才能發生' },
+            { value: 'C', label: '動作是指一短暫且不能中斷的行為，執行完才會進入目的狀態' },
+            { value: 'D', label: '事件是一種刺激，能激起狀態的轉換' }
+          ],
+          correct: 'A'
+        },
+        {
+          id: 'q5',
+          text: '以下那些圖具有深度？（多選題）',
+          type: 'checkbox',
+          options: [
+            { value: 'A', label: '狀態圖' },
+            { value: 'B', label: '活動圖' },
+            { value: 'C', label: '元件圖' },
+            { value: 'D', label: '部署圖' }
+          ],
+          correct: ['A', 'B']
+        },
+        {
+          id: 'q6',
+          text: '狀態圖中，那一種狀態可作為記憶之用？',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '超狀態' },
+            { value: 'B', label: '結束狀態' },
+            { value: 'C', label: '起始狀態' },
+            { value: 'D', label: '歷史狀態' }
+          ],
+          correct: 'D'
+        },
+        {
+          id: 'q7',
+          text: '關於下圖，以下敘述何者錯誤？',
+          image: 'https://flipclass.stust.edu.tw/sysdata/attach/kexam.33220/kques.803651/170c88b1de04f088accedf4e131e18fc.png',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '由狀態A，經事件p，進入狀態F的子狀態F1。' },
+            { value: 'B', label: '由狀態B，經事件q，進入狀態F的子狀態F2。' },
+            { value: 'C', label: '在狀態F的子狀態F3，經事件r，進入狀態C。' },
+            { value: 'D', label: '狀態F必須進入結束狀態後，且經事件s，才能進入狀態D。' }
+          ],
+          correct: 'D'
+        },
+        {
+          id: 'q8',
+          text: '關於底下的圖形，何者描述錯誤？',
+          image: 'https://flipclass.stust.edu.tw/sysdata/attach/kexam.33220/kques.803652/44599e50c51b6e5c7b951754764178e9.png',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '「24小時出貨」與「一般出貨」二選一執行' },
+            { value: 'B', label: '有設定責任區' },
+            { value: 'C', label: '「發票處理」與「出貨處理」可同時執行' },
+            { value: 'D', label: '「結束訂單」上面只要任何一方先完成，馬上就可執行「結束訂單」' }
+          ],
+          correct: 'D'
+        },
+        {
+          id: 'q9',
+          text: '附圖中的洗滌狀態是哪一種類型的狀態？',
+          image: 'https://flipclass.stust.edu.tw/sysdata/attach/kexam.33220/kques.803653/032d042cbc6d75a259083890db685053.png',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '循序組合狀態' },
+            { value: 'B', label: '同步組合狀態' },
+            { value: 'C', label: '歷史狀態' },
+            { value: 'D', label: '開始狀態' }
+          ],
+          correct: 'A'
+        },
+        {
+          id: 'q10',
+          text: '關於下圖，以下敘述何者錯誤？',
+          image: 'https://flipclass.stust.edu.tw/sysdata/attach/kexam.33220/kques.803654/8a0312f90f5aacfa0a92c83627f1a53b.png',
+          type: 'radio',
+          options: [
+            { value: 'A', label: '一進入洗滌狀態，即同時處在「攪拌式」與「低速」兩個子狀態' },
+            { value: 'B', label: '一分鐘後，即同時處在「攪拌式」與「中速」兩個子狀態' },
+            { value: 'C', label: '五分鐘後，即同時處在「離心力」與「中速」兩個子狀態' },
+            { value: 'D', label: '同時進入「結束」子狀態' }
+          ],
+          correct: 'C'
+        }
+      ]
+    };
+
+    const quizSelect = document.getElementById('quiz-select');
+    const quizContainer = document.getElementById('quiz');
+    const submitButton = document.getElementById('submit');
+    const totalResult = document.getElementById('total-result');
+
+    function renderQuiz(quizKey) {
+      quizContainer.innerHTML = '';
+      totalResult.innerHTML = '';
+      const questions = quizzes[quizKey];
+      try {
+        questions.forEach((q, index) => {
+          const questionDiv = document.createElement('div');
+          questionDiv.className = 'question';
+          questionDiv.innerHTML = `
+            <p>${index + 1}. ${q.text}</p>
+            ${q.image ? `<img src="${q.image}" alt="UML Diagram"><br><a href="${q.image}" target="_blank">查看原始圖片</a>` : ''}
+            ${q.options.map(option => `
+              <label>
+                <input type="${q.type}" name="${q.id}" value="${option.value}">
+                ${option.value}. ${option.label}
+              </label><br>
+            `).join('')}
+            <p id="result-${q.id}" class="result"></p>
+          `;
+          quizContainer.appendChild(questionDiv);
+        });
+      } catch (error) {
+        console.error('題目生成失敗:', error);
+        quizContainer.innerHTML = '<p style="color: red;">題目載入失敗，請檢查程式碼或瀏覽器設定。</p>';
+      }
+    }
+
+    // 初始載入第一個測驗
+    renderQuiz(quizSelect.value);
+
+    // 當選擇測驗時重新渲染
+    quizSelect.addEventListener('change', () => {
+      renderQuiz(quizSelect.value);
+    });
+
+    // 提交答案
+    submitButton.addEventListener('click', () => {
+      const questions = quizzes[quizSelect.value];
+      let score = 0;
+      const total = questions.length;
+
+      questions.forEach(q => {
+        const resultElement = document.getElementById(`result-${q.id}`);
+        if (q.type === 'checkbox') {
+          const selected = Array.from(document.querySelectorAll(`input[name="${q.id}"]:checked`)).map(input => input.value);
+          const correct = q.correct;
+          if (selected.length === correct.length && selected.every(val => correct.includes(val))) {
+            score++;
+            resultElement.innerHTML = '<span class="correct">正確</span>';
+          } else {
+            resultElement.innerHTML = `<span class="incorrect">錯誤 正確答案是 ${correct.join(', ')}</span>`;
+          }
+        } else {
+          const selected = document.querySelector(`input[name="${q.id}"]:checked`)?.value;
+          if (selected === q.correct) {
+            score++;
+            resultElement.innerHTML = '<span class="correct">正確</span>';
+          } else {
+            resultElement.innerHTML = `<span class="incorrect">錯誤 正確答案是 ${q.correct}</span>`;
+          }
+        }
+      });
+
+      totalResult.innerHTML = `總得分：${score} / ${total}（${(score / total * 100).toFixed(2)}%）`;
+    });
+  </script>
+</body>
+</html>
