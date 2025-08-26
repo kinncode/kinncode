@@ -23,7 +23,7 @@
 - Creative coding and data analysis
 
 ## 📫 How to reach me
-- Email: your.email@example.com
+- Email: hsiang305@gmail.com
 - LinkedIn: [linkedin.com/in/yourprofile](https://linkedin.com)
 - Twitter: [@yourhandle](https://twitter.com)
 
