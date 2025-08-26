@@ -1,5 +1,4 @@
-# Hi, I’m YuKinn 👋
-### GitHub Stats
+# Hi, I’m Kinn 👋
 ![YuKinn's GitHub stats](https://github-readme-stats.vercel.app/api?username=kinncode&show_icons=true&theme=radical)
 ![Header Image](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExdXcyaXd4YWN4Y2FhbGE4Zm9tNmxuemEwM3I5bHBoYWF4bGIzbjI3cSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/o0vwzuFwCGAFO/giphy.gif)
 
