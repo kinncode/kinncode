@@ -1,37 +1,30 @@
-# Hi, I’m Kinn 👋
-![YuKinn's GitHub stats](https://github-readme-stats.vercel.app/api?username=kinncode&show_icons=true&theme=radical)
+# Hi, I’m Kinn 🍵
 ![Header Image](https://media.tenor.com/65bUl5-gbL0AAAAi/baby-ai-meme.gif)
 
-## 🔭 I’m currently working on
-- Developing web apps with **Flutter** and **React**
-- Exploring **machine learning models** for SROI assessment
-- Building fun **interactive projects** 🐱✨
+**IM Student | Developer | Aspiring Educator** *Turning complex logic into aesthetic experiences.* ✨
 
-## 🌱 I’m currently learning
-- Advanced **AI prompt engineering**
-- **Data visualization** for large datasets
-- **Project management** tools and best practices
+## 🛠️ Tech Stack & Focus
+- **Frontend:** React, Vite, Capacitor (Web to Mobile Specialist 📲)
+- **Backend:** Python, Flask, SQL
+- **AI/Data:** Generative AI Prompts, SROI Analysis
 
-## 👯 I’m looking to collaborate on
-- Open-source **web or mobile apps**
-- Projects integrating **AI with sustainability**
-- Fun **interactive UI/UX designs**
+## 🔭 Current Lab
+- **Drink Ledger:** Not just tracking money, but analyzing consumption habits with AI.
+- **LyricGap:** Gamifying language learning through music.
+- **International Women's Day Project:** Celebrating culture through web dev.
 
-## 💬 Ask me about
-- Flutter, React, AI, Project management
-- Strategy planning & team collaboration
-- Creative coding and data analysis
+## 🎯 Goals
+- Mastering **Deep Learning** concepts (beyond just calling APIs).
+- Creating educational content for **Vietnamese & Chinese** speakers.
+- Blending **Y2K aesthetics** with modern UI libraries.
 
-## 📫 How to reach me
+## 💬 Let's Chat About
+- Why **Chainsaw Man** is a masterpiece. 🐕
+- How to deploy React apps to Android Studio without losing your mind. 🤯
+- Photography angles & composition. 📸
+
+## 📫 Contact
 - Email: hsiang305@gmail.com
-- LinkedIn: [linkedin.com/in/yourprofile](https://linkedin.com)
-- Twitter: [@yourhandle](https://twitter.com)
-
-## ⚡ Fun fact
-- I love **strategy games** 🎮 and planning projects 📋
-- Currently **training my cat to surf** (virtually 🐱🏄‍♂️)
 
 ---
-
-
-
+*"I code, I plan, and I capture moments."*
